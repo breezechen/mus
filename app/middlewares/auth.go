@@ -1,19 +1,16 @@
 package middlewares
 
 import (
-	"net/http"
-	"github.com/JohnSmithX/mus/app/db"
-	"github.com/JohnSmithX/mus/app/models"
 	"fmt"
-	"time"
+	"github.com/breezechen/mus/app/db"
+	"github.com/breezechen/mus/app/models"
 	"go/token"
+	"net/http"
+	"time"
 )
 
 type Store interface {
-
 }
-
-
 
 func Auth(store *db.Storage) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
@@ -36,7 +33,6 @@ func Auth(store *db.Storage) func(http.Handler) http.Handler {
 			if err != nil {
 				return
 			}
-
 
 			if str == token {
 				h.ServeHTTP(w, r)

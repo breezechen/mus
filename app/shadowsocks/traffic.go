@@ -3,13 +3,12 @@
 package shadowsocks
 
 import (
-	"github.com/JohnSmithX/mus/app/shadowsocks/lib"
-	"sync"
-	"log"
+	"github.com/breezechen/mus/app/shadowsocks/lib"
 	"github.com/dropbox/godropbox/errors"
 	"io"
+	"log"
+	"sync"
 )
-
 
 //pipe between client and remote
 type traffic struct {
@@ -30,7 +29,7 @@ func (t *traffic) doWithLock(fn func()) {
 
 func (t *traffic) NewClient(c lib.SSClienter) {}
 
-func (t *traffic) ClientReadErr(c lib.SSClienter, err error){
+func (t *traffic) ClientReadErr(c lib.SSClienter, err error) {
 	//err => EOF | i/o timeout | use closed network
 	if err != io.EOF {
 		log.Println(errors.New(err.Error()))
@@ -38,12 +37,11 @@ func (t *traffic) ClientReadErr(c lib.SSClienter, err error){
 
 }
 
-func (t *traffic) NewRemote(c lib.SSClienter){}
+func (t *traffic) NewRemote(c lib.SSClienter) {}
 
-func (t *traffic) RemoteReadErr(c lib.SSClienter, err error){
+func (t *traffic) RemoteReadErr(c lib.SSClienter, err error) {
 	c.Close()
 }
-
 
 func (t *traffic) ClientNewData(c lib.SSClienter, data []byte) (err error) {
 	//do anything with data
@@ -68,7 +66,7 @@ func (t *traffic) RemoteNewData(c lib.SSClienter, data []byte) (err error) {
 }
 
 func (t *traffic) Record(i int) {
-	t.doWithLock(func () {
+	t.doWithLock(func() {
 		t.flow += int64(i)
 	})
 	t.recordFunc(i)

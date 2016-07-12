@@ -1,23 +1,22 @@
 package models
 
 import (
-	"github.com/JohnSmithX/mus/app/utils"
-	"github.com/JohnSmithX/mus/app/db"
-	ss "github.com/JohnSmithX/mus/app/shadowsocks"
 	"encoding/json"
+	"github.com/breezechen/mus/app/db"
+	ss "github.com/breezechen/mus/app/shadowsocks"
+	"github.com/breezechen/mus/app/utils"
 	uuid "github.com/satori/go.uuid"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/dropbox/godropbox/errors"
 	"sync"
-
 )
 
 //for redis key string
 const (
 	serverPrefix = "mus:server:"
-	flowPrefix = "mus:flow:"
+	flowPrefix   = "mus:flow:"
 )
 
 var (
@@ -39,30 +38,28 @@ type ServerI interface {
 	Key() string
 }
 
-
 type Server struct {
-	mu   				sync.Mutex
-	proxy				ss.Proxyer
+	mu    sync.Mutex
+	proxy ss.Proxyer
 
 	//current flow
-	current       		int64
+	current int64
 
-	Id 					uuid.UUID		`json:"id"`
-	CreateTime			utils.Time		`json:"create_at"`
-	UpdateTime			utils.Time		`json:"update_at"`
-	Port 				string			`json:"port"`
-	Method       		string       	`json:"method"`
-	Password      		string       	`json:"password"`
-	Limit         		int64        	`json:"limit"`
-	Timeout       		int64        	`json:"timeout"`
+	Id         uuid.UUID  `json:"id"`
+	CreateTime utils.Time `json:"create_at"`
+	UpdateTime utils.Time `json:"update_at"`
+	Port       string     `json:"port"`
+	Method     string     `json:"method"`
+	Password   string     `json:"password"`
+	Limit      int64      `json:"limit"`
+	Timeout    int64      `json:"timeout"`
 }
 
+func New(port, method, password string, limit, timeout int64) (server *Server, err error) {
 
-func New(port, method, password string, limit, timeout int64) (server *Server,err error) {
-	
 	server = &Server{}
 
-	server.proxy, err = ss.New(":" + port, method, password, time.Duration(timeout), func(int){})
+	server.proxy, err = ss.New(":"+port, method, password, time.Duration(timeout), func(int) {})
 	if err != nil {
 		err = errors.New(err.Error())
 		return
@@ -73,7 +70,7 @@ func New(port, method, password string, limit, timeout int64) (server *Server,er
 	server.Limit = limit
 	server.Timeout = timeout
 	err = server.initialize()
-	
+
 	return
 }
 
@@ -115,16 +112,16 @@ func (self *Server) doWithLock(fn func()) {
 	fn()
 }
 
-func (self *Server) getCurrent() (n int64, err error){
+func (self *Server) getCurrent() (n int64, err error) {
 	n, err = rdPool.GetNum(self.flowKey())
 	if err != nil {
 		err = errors.New(err.Error())
-		self.doWithLock(func(){
+		self.doWithLock(func() {
 			self.current = 0
 		})
 		return
 	}
-	self.doWithLock(func(){
+	self.doWithLock(func() {
 		self.current = n
 	})
 
@@ -141,7 +138,6 @@ func (self *Server) crTime() {
 	self.CreateTime = utils.Time(time.Now())
 }
 
-
 func (self *Server) save() (err error) {
 
 	defer func() {
@@ -156,7 +152,6 @@ func (self *Server) save() (err error) {
 	err = rdPool.Set(self.serverKey(), data)
 	return
 }
-
 
 func (self *Server) Update() (err error) {
 	self.upTime()
@@ -204,7 +199,7 @@ func (self *Server) Key() string {
 
 //operate servers from redis
 func GetServerFromRedis(port string) (server *Server, err error) {
-	data, err :=  rdPool.GetByt(addPrefix(port, serverPrefix))
+	data, err := rdPool.GetByt(addPrefix(port, serverPrefix))
 
 	if err != nil {
 
@@ -229,7 +224,7 @@ func GetServerFromRedis(port string) (server *Server, err error) {
 	return
 }
 
-func GetServersFromRedis( ports ...string) (servers []*Server, err error) {
+func GetServersFromRedis(ports ...string) (servers []*Server, err error) {
 	if len(ports) == 0 {
 		err = errors.New("Need port but port is nil")
 		return
@@ -270,5 +265,3 @@ func GetAllServersFromRedis() (servers []*Server, err error) {
 	}
 	return
 }
-
-

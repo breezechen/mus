@@ -1,20 +1,18 @@
 package controllers
 
 import (
-	"github.com/JohnSmithX/mus/app/models"
-	"github.com/JohnSmithX/mus/app/manager"
-	"github.com/JohnSmithX/mus/app/utils"
-	"net/http"
 	"fmt"
+	"github.com/breezechen/mus/app/db"
+	"github.com/breezechen/mus/app/manager"
+	"github.com/breezechen/mus/app/models"
+	"github.com/breezechen/mus/app/utils"
 	"github.com/dropbox/godropbox/errors"
-	"github.com/JohnSmithX/mus/app/db"
+	"net/http"
 )
+
 var (
 	SM *manager.Manager
 )
-
-
-
 
 func NewAPI(rdPool *db.Storage) {
 
@@ -29,25 +27,19 @@ func NewAPI(rdPool *db.Storage) {
 		utils.Debug(err)
 	}
 
-
 	for _, server := range servers {
 		SM.AddServerToManager(server)
 	}
 
-
 	return
 }
 
-
 func NewServerAPI() *ServerAPI {
-	return &ServerAPI{
-	}
+	return &ServerAPI{}
 }
 
 func NewAction() *ServerActionsAPI {
-	return &ServerActionsAPI{
-
-	}
+	return &ServerActionsAPI{}
 }
 
 func JsonView(fn func(w http.ResponseWriter, r *http.Request) (string, error)) http.HandlerFunc {

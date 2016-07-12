@@ -3,20 +3,15 @@
 package manager
 
 import (
-	"sync"
+	"github.com/breezechen/mus/app/models"
 	"github.com/dropbox/godropbox/errors"
-	"github.com/JohnSmithX/mus/app/models"
-
+	"sync"
 )
 
-
-
 type Manager struct {
-	mu sync.Mutex
+	mu      sync.Mutex
 	servers map[string]models.ServerI //port -> ss server
 }
-
-
 
 func NewManager() (manager *Manager) {
 
@@ -25,7 +20,6 @@ func NewManager() (manager *Manager) {
 	manager.servers = make(map[string]models.ServerI)
 	return
 }
-
 
 //wrap lock method
 func (self *Manager) doWithLock(fn func()) {
@@ -47,14 +41,13 @@ func (self *Manager) validServer(port string) (err error) {
 	return
 }
 
-
 //operate servers from manager
 func (self *Manager) GetServerFromManager(port string) (server models.ServerI, err error) {
 	err = self.validServer(port)
 	if err != nil {
 		return
 	}
-	self.doWithLock(func () {
+	self.doWithLock(func() {
 		server = self.servers[port]
 	})
 	return
@@ -93,7 +86,7 @@ func (self *Manager) AddServerToManager(server models.ServerI) (err error) {
 		err = errors.Newf("Add proxy server to manager failed: proxy server has existed on port: %s", server.Key())
 		return
 	}
-	self.doWithLock(func () {
+	self.doWithLock(func() {
 		self.servers[server.Key()] = server
 	})
 
@@ -119,7 +112,7 @@ func (self *Manager) DelServerFromManager(port string) (server models.ServerI, e
 		return
 	}
 
-	self.doWithLock(func () {
+	self.doWithLock(func() {
 		delete(self.servers, port)
 	})
 	return
@@ -155,18 +148,16 @@ func (self *Manager) DelAllServersFromManager() (servers []models.ServerI, err e
 	return
 }
 
-
 //TODO: API
 
-
 //GET /api/servers
-func (self *Manager) All() (servers []models.ServerI, err error)  {
+func (self *Manager) All() (servers []models.ServerI, err error) {
 	servers, err = self.GetAllServersFromManager()
 	return
 }
 
 //POST /api/servers
-func (self *Manager) Create(server models.ServerI) (err error)  {
+func (self *Manager) Create(server models.ServerI) (err error) {
 	err = self.AddServerToManager(server)
 	return
 }

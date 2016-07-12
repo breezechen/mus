@@ -1,17 +1,14 @@
 package controllers
 
 import (
-	"net/http"
 	j "encoding/json"
-	"github.com/JohnSmithX/mus/app/models"
+	"github.com/breezechen/mus/app/models"
 	"github.com/dropbox/godropbox/errors"
+	"net/http"
 )
 
 type ServerAPI struct {
 }
-
-
-
 
 //Get("/api/servers", "get all")
 func (self *ServerAPI) Index(w http.ResponseWriter, r *http.Request) (json string, err error) {
@@ -29,15 +26,12 @@ func (self *ServerAPI) Index(w http.ResponseWriter, r *http.Request) (json strin
 
 }
 
-
-
 //Post("/api/servers", "create new")
 func (self *ServerAPI) Create(w http.ResponseWriter, r *http.Request) (json string, err error) {
-	
+
 	opt := &models.Server{}
 
 	decoder := j.NewDecoder(r.Body)
-
 
 	err = decoder.Decode(opt)
 	if err != nil {
@@ -49,7 +43,7 @@ func (self *ServerAPI) Create(w http.ResponseWriter, r *http.Request) (json stri
 	if err != nil {
 		return
 	}
-	
+
 	err = SM.Create(server)
 	if err != nil {
 		return
@@ -61,7 +55,6 @@ func (self *ServerAPI) Create(w http.ResponseWriter, r *http.Request) (json stri
 func (self *ServerAPI) Show(w http.ResponseWriter, r *http.Request) (json string, err error) {
 	params := r.URL.Query()
 	id := params.Get(":id")
-
 
 	server, err := SM.Show(id)
 	if err != nil {
@@ -94,7 +87,6 @@ func (self *ServerAPI) Destroy(w http.ResponseWriter, r *http.Request) (json str
 //Put("/api/servers/:id", "update :id server")
 func (self *ServerAPI) Update(w http.ResponseWriter, r *http.Request) (json string, err error) {
 
-
 	params := r.URL.Query()
 	id := params.Get(":id")
 	server, err := SM.Show(id)
@@ -122,6 +114,3 @@ func (self *ServerAPI) Update(w http.ResponseWriter, r *http.Request) (json stri
 	}
 	return
 }
-
-
-

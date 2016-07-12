@@ -1,16 +1,15 @@
 package lib
 
-
 import (
-	ss "github.com/shadowsocks/shadowsocks-go/shadowsocks"
+	"encoding/binary"
 	"github.com/dropbox/godropbox/errors"
 	"github.com/oxtoacart/bpool"
-	"net"
+	ss "github.com/shadowsocks/shadowsocks-go/shadowsocks"
 	"io"
-	"encoding/binary"
+	"net"
 	"strconv"
-	"syscall"
 	"sync"
+	"syscall"
 )
 
 const (
@@ -32,24 +31,23 @@ var (
 	bytePool = bpool.NewBytePool(4096, 2048)
 )
 
-
 type SSClienter interface {
 	net.Conn
 	Remote() net.Conn
 }
 
 type client struct {
-	mu 			sync.Mutex
+	mu sync.Mutex
 	*ss.Conn
-	server 		*ProxyServer
-	remote		*remote
-	closed		bool
+	server *ProxyServer
+	remote *remote
+	closed bool
 }
 
 type remote struct {
 	mu sync.Mutex
 	net.Conn
-	closed		bool
+	closed bool
 }
 
 func (c *client) doWithLock(fn func()) {
@@ -88,7 +86,6 @@ func (r *remote) Read(b []byte) (n int, err error) {
 	}
 	return
 }
-
 
 func (c *client) Close() (err error) {
 	if !c.closed {
@@ -155,7 +152,7 @@ func (c *client) newRemote(conn net.Conn) {
 func (c *client) parse() (conn net.Conn, extra []byte, err error) {
 
 	var (
-		ip string
+		ip   string
 		port string
 		host string
 	)
@@ -216,7 +213,7 @@ func (c *client) parse() (conn net.Conn, extra []byte, err error) {
 			// EMFILE is process reaches open file limits, ENFILE is system limit
 			err = errors.Newf("get remote dial error: %v", err)
 		} else {
-			err = errors.Newf("error connecting to remote: %s %v",  host, err)
+			err = errors.Newf("error connecting to remote: %s %v", host, err)
 		}
 		return
 	}
@@ -224,15 +221,14 @@ func (c *client) parse() (conn net.Conn, extra []byte, err error) {
 	return
 }
 
-
 func (c *client) listen() {
 
 	conn, extra, er := c.parse()
 
-	if  er != nil {
+	if er != nil {
 		return
 	}
-	
+
 	c.newRemote(conn)
 
 	flow := 0
@@ -240,11 +236,10 @@ func (c *client) listen() {
 		c.server.CallbackMethods.Record(flow)
 	}()
 
-
 	if extra != nil && len(extra) != 0 {
-		c.server.CallbackMethods.ClientNewData(c, extra )
+		c.server.CallbackMethods.ClientNewData(c, extra)
 	}
-	
+
 	buf := bytePool.Get()
 	defer bytePool.Put(buf)
 
@@ -267,7 +262,6 @@ func (c *client) listen() {
 
 	}
 }
-
 
 func (c *client) Remote() net.Conn {
 	return c.remote

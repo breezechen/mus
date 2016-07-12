@@ -1,9 +1,8 @@
 package main
 
 import (
-	"github.com/JohnSmithX/mus/app"
-	"github.com/JohnSmithX/mus/config"
-
+	"github.com/breezechen/mus/app"
+	"github.com/breezechen/mus/config"
 )
 
 func main() {
